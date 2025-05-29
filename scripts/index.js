@@ -3,6 +3,7 @@ function createCard(cardElement, deleteCardFunction) {
   // клонируем содержимое тега template и наполняем данными
   const newCardElement = cardTemplate.querySelector('.card').cloneNode(true);
   newCardElement.querySelector('.card__image').src = cardElement.link;
+  newCardElement.querySelector('.card__image').alt = 'Пейзаж ' + cardElement.name;
   newCardElement.querySelector('.card__title').textContent = cardElement.name;
 
   const deleteButton = newCardElement.querySelector('.card__delete-button');

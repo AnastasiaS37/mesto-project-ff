@@ -6,6 +6,7 @@ export function openPopup(popupToOpen) {
 
 export function closePopup(popupToClose) {
   popupToClose.classList.remove('popup_is-opened');
+  document.removeEventListener('keyup', handleEscKey);
 };
 
 // Обработчик нажатия на esc
@@ -13,7 +14,6 @@ export function handleEscKey(evt) {
   if (evt.key === "Escape") {
     const openedPopup = document.querySelector('.popup_is-opened');
     closePopup(openedPopup);
-    document.removeEventListener('keyup', handleEscKey);
   };
 };
 

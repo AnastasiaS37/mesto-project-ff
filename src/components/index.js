@@ -1,5 +1,6 @@
 import '../pages/index.css';
-import { initialCards, createCard, deleteCard, handleLike } from './cards.js';
+import { initialCards } from './cards.js';
+import { createCard, deleteCard, handleLike } from './card.js';
 import { openPopup, closePopup, addCloseListeners } from './modal.js';
 
 const profileEditButton = document.querySelector('.profile__edit-button');
@@ -20,12 +21,15 @@ initialCards.forEach(function (item) {
   placesList.append(cardToAdd);
 });
 
+addCloseListeners(popupImage);
+addCloseListeners(popupEditProfile);
+addCloseListeners(popupNewCard);
+
 // Обработчик нажатия на картинку
 function handleImageClick(evt) {
   openPopup(popupImage);
   popupImage.querySelector('.popup__image').src = evt.target.src;
   popupImage.querySelector('.popup__caption').textContent = evt.target.alt;
-  addCloseListeners(popupImage);
 };
 
 // Обработка нажатия на редактирование профиля и на добавление карточки
@@ -33,13 +37,11 @@ profileEditButton.addEventListener('click', function() {
   profileName.value = document.querySelector('.profile__title').textContent;
   profileDescription.value = document.querySelector('.profile__description').textContent;
   openPopup(popupEditProfile);
-  addCloseListeners(popupEditProfile);
 });
 
 cardAddButton.addEventListener('click', function() {
   addCardForm.reset();
   openPopup(popupNewCard);
-  addCloseListeners(popupNewCard);
 });
 
 // Обработка отправки формы профиля и формы добавления карточки

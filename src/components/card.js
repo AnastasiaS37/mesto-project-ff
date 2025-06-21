@@ -8,7 +8,7 @@ export function createCard(cardElement, deleteCardFunction, likeCardFunction, im
   newCardElement.querySelector('.card__title').textContent = cardElement.name;
 
   const deleteButton = newCardElement.querySelector('.card__delete-button');
-  deleteButton.addEventListener('click', function (evt) {
+  deleteButton.addEventListener('click', function () {
     const cardToDelete = deleteButton.closest('.card');
     deleteCardFunction(cardToDelete);
   });
@@ -30,9 +30,5 @@ export function deleteCard(cardToDelete) {
 
 // Обработчик лайка карточки
 export function handleLike(evt) {
-  if (! evt.target.classList.contains('card__like-button_is-active')) {
-    evt.target.classList.add('card__like-button_is-active');
-  } else {
-    evt.target.classList.remove('card__like-button_is-active');
-  };
+  evt.target.classList.toggle('card__like-button_is-active');
 };

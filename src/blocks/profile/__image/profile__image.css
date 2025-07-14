@@ -9,6 +9,28 @@
   margin: 0 29px 0 0;
 }
 
+.profile__image:hover::before {
+  content: '';
+  display: block;
+  position: relative;
+  background: rgba(0, 0, 0, 0.8);
+  width: 120px;
+  height: 120px;
+  -webkit-border-radius: 50%;
+}
+
+.profile__image:hover::after {
+  content: '';
+  display: block;
+  background: url('../../../images/edit-icon.svg') no-repeat;
+  background-size: 26px;
+  width: 26px;
+  height: 26px;
+  position: relative;
+  top: -60%;
+  left: 39%;
+}
+
 @media screen and (max-width: 740px) {
   .profile__image {
     margin: 0 10px 0 0;

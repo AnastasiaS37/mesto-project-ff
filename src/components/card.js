@@ -6,8 +6,23 @@ export function createCard(cardElement, deleteCardFunction, likeCardFunction, im
   newCardElement.querySelector('.card__image').src = cardElement.link;
   newCardElement.querySelector('.card__image').alt = cardElement.name;
   newCardElement.querySelector('.card__title').textContent = cardElement.name;
-  const deleteButton = newCardElement.querySelector('.card__delete-button');
+  const likeButton = newCardElement.querySelector('.card__like-button');
+  const cardLikesNumber = newCardElement.querySelector('.card__likes');
+  // console.log(cardElement.likes);
+  function renderLikes(cardElement) {
+    const cardIsLiked = cardElement.likes.map((like) => like._id).includes(myUserID);
+    // console.log(cardIsLiked);
+    likeButton.classList.toggle('card__like-button_is-active', cardIsLiked);
+    cardLikesNumber.textContent = cardElement.likes.length;
+  };
+  renderLikes(cardElement);
+  
+  likeButton.addEventListener('click', function() {
+    const isLiked = likeButton.classList.contains('card__like-button_is-active');
+    likeCardFunction(cardElement._id, isLiked, renderLikes);
+  });
 
+  const deleteButton = newCardElement.querySelector('.card__delete-button');
   if(cardElement.owner._id != myUserID) {
     deleteButton.style.display = 'none';
   } else {
@@ -18,9 +33,6 @@ export function createCard(cardElement, deleteCardFunction, likeCardFunction, im
     });
   };
 
-  const likeButton = newCardElement.querySelector('.card__like-button');
-  likeButton.addEventListener('click', likeCardFunction);
-
   const cardImage = newCardElement.querySelector('.card__image');
   cardImage.addEventListener('click', imageOpenFunction);
 
@@ -28,6 +40,8 @@ export function createCard(cardElement, deleteCardFunction, likeCardFunction, im
 };
 
 // Обработчик лайка карточки
-export function handleLike(evt) {
-  evt.target.classList.toggle('card__like-button_is-active');
-};
+// export function handleLike() {
+//   //evt.target.classList.toggle('card__like-button_is-active');
+//   toggleLikePromise()
+//     .then()
+// };

@@ -32,6 +32,24 @@
       © 2021 Mesto Russia
     </p>
   </footer>
+  <div class="popup popup_type_update-avatar popup_is-animated">
+    <div class="popup__content popup__content_type_update-avatar">
+      <button type="button" class="popup__close"></button>
+      <h3 class="popup__title">Обновить аватар</h3>
+      <form class="popup__form" name="update-avatar">
+        <input
+          id="avatar-url-input"
+          type="url"
+          name="avatar-url"
+          class="popup__input popup__input_type_avatar-url"
+          placeholder="Ссылка"
+          required
+        >
+        <span class="avatar-url-input-error popup__error"></span>
+        <button type="submit" class="button popup__button">Сохранить</button>
+      </form>
+    </div>
+  </div>
   <div class="popup popup_type_edit popup_is-animated">
     <div class="popup__content">
       <button type="button" class="popup__close"></button>
@@ -125,7 +143,7 @@
       </h2>
       <div class="card__like-button-wrapper">
         <button type="button" class="card__like-button"></button>
-        <span class="card__likes">0</span>
+        <span class="card__likes"></span>
       </div>
     </div>
   </li>

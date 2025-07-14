@@ -1,6 +1,6 @@
 import '../pages/index.css';
 import { initialCards } from './cards.js';
-import { createCard, deleteCard, handleLike } from './card.js';
+import { createCard, handleLike } from './card.js';
 import { openPopup, closePopup, addCloseListeners } from './modal.js';
 import { validationConfig, clearValidation, enableValidation } from './validation.js';
 
@@ -19,15 +19,14 @@ const addCardForm = document.forms['new-place'];
 const placeName = addCardForm.elements['place-name'];
 const photoLink = addCardForm.elements.link;
 const placesList = document.querySelector('.places__list');
-
-/*initialCards.forEach(function (item) {
-  const cardToAdd = createCard(item, deleteCard, handleLike, handleImageClick);
-  placesList.append(cardToAdd);
-}); */
+const popupConfirmDeletion = document.querySelector('.popup_type_confirm-deletion');
+// const confirmDeletionButton = popupConfirmDeletion.querySelector('.popup__button_type_confirm-deletion');
+const confirmDeletionForm = document.forms['confirm-deletion'];
 
 addCloseListeners(popupImage);
 addCloseListeners(popupEditProfile);
 addCloseListeners(popupNewCard);
+addCloseListeners(popupConfirmDeletion);
 
 // Обработчик нажатия на картинку
 function handleImageClick(evt) {
@@ -55,8 +54,12 @@ function handleProfileFormSubmit(evt) {
   evt.preventDefault();
   const openedPopup = document.querySelector('.popup_is-opened');
   const openedForm = openedPopup.querySelector('.popup__form');
-  userName.textContent = profileName.value;
-  userAbout.textContent = profileDescription.value;
+  updateUserData(profileName.value, profileDescription.value)  // Функция обработки запроса данных при редактировании профиля
+   .then((newUserData) => {
+      // console.log(newUserData);
+      userName.textContent = newUserData.name;
+      userAbout.textContent = newUserData.abt;
+    });
   closePopup(openedPopup);
   openedForm.reset();
 };
@@ -65,12 +68,12 @@ function handleCardFormSubmit(evt) {
   evt.preventDefault();
   const openedPopup = document.querySelector('.popup_is-opened');
   const openedForm = openedPopup.querySelector('.popup__form');
-  const newCardItem = {
-    name: placeName.value,
-    link: photoLink.value
-  };
-  const newCardToAdd = createCard(newCardItem, deleteCard, handleLike, handleImageClick);
-  placesList.prepend(newCardToAdd);
+  updateCardData(placeName.value, photoLink.value) // Функция обработки запроса данных при добавлении новой карточки
+     .then((newCardData) => {
+      // console.log(newCardData);
+      const newCardToAdd = createCard(newCardData, deleteCard, handleLike, handleImageClick, baseConfig.myUserID);
+      placesList.prepend(newCardToAdd);
+    });
   closePopup(openedPopup);
   openedForm.reset();
 };
@@ -78,32 +81,76 @@ function handleCardFormSubmit(evt) {
 editProfileForm.addEventListener('submit', handleProfileFormSubmit);
 addCardForm.addEventListener('submit', handleCardFormSubmit);
 
+// Обработчик удаления карточки
+let cardToDeleteData = {};
+
+function deleteCard(cardToDelete, cardToDeleteID) {
+  cardToDeleteData = {cardToDelete, id: cardToDeleteID};
+  openPopup(popupConfirmDeletion);
+  // cardToDelete.remove();
+  return;
+};
+
+function handleCardDeletionSubmit(evt) {
+  evt.preventDefault();
+  if (!cardToDeleteData.cardToDelete) return;
+  cardDeletionPromise(cardToDeleteData.id)
+    .then(() => {
+      cardToDeleteData.cardToDelete.remove();
+      closePopup(popupConfirmDeletion);
+      cardToDeleteData = {};
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+};
+
+confirmDeletionForm.addEventListener('submit', handleCardDeletionSubmit);
+
+
 // Валидация форм
 enableValidation(validationConfig);
 
 //// API
+const baseConfig = {
+  url: 'https://nomoreparties.co/v1/wff-cohort-42',
+  token: '1bc14402-fe38-4b04-90a8-028dfc53871d',
+  myUserID: '9466035ed48581704398b9ea'
+};
+
+// Функция проверки ответа сервера
+function checkResponse(res) {
+  if (res.ok) {
+    return res.json();
+  }
+  return res.json()
+    .then((error) => {
+      error.httpResponseCode = res.status;
+      return Promise.reject(error);
+    })
+};
 
 // Загрузка информации о пользователе с сервера
 function userDataPromise() {
-  return fetch('https://nomoreparties.co/v1/wff-cohort-42/users/me', {
+  return fetch(`${baseConfig.url}/users/me`, {
     headers: {
-      authorization: '1bc14402-fe38-4b04-90a8-028dfc53871d'
+      authorization: baseConfig.token
     }
   })
     .then((res) => {
-      return res.json()
+      return res.json() // checkResponse
     })
 };
 
 // Загрузка карточек с сервера
 function cardDataPromise() {
-  return fetch('https://nomoreparties.co/v1/wff-cohort-42/cards', {
+  return fetch(`${baseConfig.url}/cards`, {
     headers: {
-      authorization: '1bc14402-fe38-4b04-90a8-028dfc53871d'
+      authorization: baseConfig.token
     }
   })
     .then((res) => {
-      return res.json()
+      return res.json() // checkResponse
     })
 };
 
@@ -112,53 +159,54 @@ Promise.all([userDataPromise(), cardDataPromise()])
     userName.textContent = userData.name;
     userAbout.textContent = userData.about;
     userAvatar.style['background-image'] = `url('${userData.avatar}')`;
-
     cardsData.forEach(function (item) {
-      const cardToAdd = createCard(item, deleteCard, handleLike, handleImageClick);
+      const cardToAdd = createCard(item, deleteCard, handleLike, handleImageClick, baseConfig.myUserID);
       placesList.append(cardToAdd);
     });
   });
 
-// Редактирование профиля
-function updateUserData() {
-  return fetch('https://nomoreparties.co/v1/wff-cohort-42/users/me', {
+// Запрос данных при редактировании профиля
+function updateUserData(newUserName, newUserDescription) {
+  return fetch(`${baseConfig.url}/users/me`, {
     method: 'PATCH',
     headers: {
-      authorization: '1bc14402-fe38-4b04-90a8-028dfc53871d',
+      authorization: baseConfig.token,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      name: 'Marie Skłodowska Curie',
-      about: 'Physicist and Chemist'
+      name: newUserName,
+      about: newUserDescription
     })
   })
-    .then((res) => {
-      return res.json()
-    })
-    // .then((data) => {
-    //   console.log(data)
-    // })
+    .then(checkResponse)
 };
-// updateUserData();
 
-// Добавление новой карточки
-function updateCardData() {
-  return fetch('https://nomoreparties.co/v1/wff-cohort-42/cards', {
+// Запрос данных при добавлении новой карточки
+function updateCardData(newCardName, newCardLink) {
+  return fetch(`${baseConfig.url}/cards`, {
     method: 'POST',
     headers: {
-      authorization: '1bc14402-fe38-4b04-90a8-028dfc53871d',
+      authorization: baseConfig.token,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      name: 'Байкал',
-      link: 'https://pictures.s3.yandex.net/frontend-developer/cards-compressed/baikal.jpg'
+      name: newCardName, // Байкал
+      link: newCardLink // https://pictures.s3.yandex.net/frontend-developer/cards-compressed/baikal.jpg
+      // https://pictures.s3.yandex.net/frontend-developer/cards-compressed/ivanovo.jpg
     })
   })
-    .then((res) => {
-      return res.json()
-    })
-    .then((data) => {
-      console.log(data)
-    })
+    .then(checkResponse)
 };
-// updateCardData();
+
+// Запрос на удаление карточки с сервера
+function cardDeletionPromise(cardID) {
+  return fetch(`${baseConfig.url}/cards/${cardID}`, {
+    method: 'DELETE',
+    headers: {
+      authorization: baseConfig.token
+    }
+  })
+    .then(checkResponse)
+};
+
+// Определение количества лайков

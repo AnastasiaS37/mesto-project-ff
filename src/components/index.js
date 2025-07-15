@@ -20,7 +20,6 @@ const placeName = addCardForm.elements['place-name'];
 const photoLink = addCardForm.elements.link;
 const placesList = document.querySelector('.places__list');
 const popupConfirmDeletion = document.querySelector('.popup_type_confirm-deletion');
-// const confirmDeletionButton = popupConfirmDeletion.querySelector('.popup__button_type_confirm-deletion');
 const confirmDeletionForm = document.forms['confirm-deletion'];
 const popupUpdateAvatar = document.querySelector('.popup_type_update-avatar');
 const updateAvatarForm = document.forms['update-avatar'];
@@ -63,6 +62,7 @@ cardAddButton.addEventListener('click', function() {
 // Обработка отправки формы обновления аватара 
 function handleUpdateAvatarFormSubmit(evt) {
   evt.preventDefault();
+  updateAvatarForm.querySelector('.popup__button').textContent = 'Сохранение...';
   updateUserAvatarPromise(avatarUrl.value)
     .then((userData) => {
       userAvatar.style['background-image'] = `url('${userData.avatar}')`;
@@ -79,29 +79,27 @@ updateAvatarForm.addEventListener('submit', handleUpdateAvatarFormSubmit);
 // Обработка отправки формы профиля и формы добавления карточки
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
-  const openedPopup = document.querySelector('.popup_is-opened');
-  const openedForm = openedPopup.querySelector('.popup__form');
-  updateUserData(profileName.value, profileDescription.value)  // Функция обработки запроса данных при редактировании профиля
+  editProfileForm.querySelector('.popup__button').textContent = 'Сохранение...';
+  updateUserDataPromise(profileName.value, profileDescription.value)  // Функция обработки запроса данных при редактировании профиля
    .then((newUserData) => {
       userName.textContent = newUserData.name;
       userAbout.textContent = newUserData.about;
     });
-  closePopup(openedPopup);
-  openedForm.reset();
+  closePopup(popupEditProfile);
+  editProfileForm.reset();
 };
 
 function handleCardFormSubmit(evt) {
   evt.preventDefault();
-  const openedPopup = document.querySelector('.popup_is-opened');
-  const openedForm = openedPopup.querySelector('.popup__form');
-  updateCardData(placeName.value, photoLink.value) // Функция обработки запроса данных при добавлении новой карточки
+  addCardForm.querySelector('.popup__button').textContent = 'Сохранение...';
+  updateCardDataPromise(placeName.value, photoLink.value) // Функция обработки запроса данных при добавлении новой карточки
      .then((newCardData) => {
       // console.log(newCardData);
       const newCardToAdd = createCard(newCardData, deleteCard, handleLike, handleImageClick, baseConfig.myUserID);
       placesList.prepend(newCardToAdd);
     });
-  closePopup(openedPopup);
-  openedForm.reset();
+  closePopup(popupNewCard);
+  addCardForm.reset();
 };
 
 editProfileForm.addEventListener('submit', handleProfileFormSubmit);
@@ -187,7 +185,7 @@ Promise.all([userDataPromise(), cardDataPromise()])
   });
 
 // Запрос данных при редактировании профиля
-function updateUserData(newUserName, newUserDescription) {
+function updateUserDataPromise(newUserName, newUserDescription) {
   return fetch(`${baseConfig.url}/users/me`, {
     method: 'PATCH',
     headers: {
@@ -203,7 +201,7 @@ function updateUserData(newUserName, newUserDescription) {
 };
 
 // Запрос данных при добавлении новой карточки
-function updateCardData(newCardName, newCardLink) {
+function updateCardDataPromise(newCardName, newCardLink) {
   return fetch(`${baseConfig.url}/cards`, {
     method: 'POST',
     headers: {

@@ -1,8 +1,8 @@
 import '../pages/index.css';
-import { initialCards } from './cards.js';
 import { createCard } from './card.js';
 import { openPopup, closePopup, addCloseListeners } from './modal.js';
 import { validationConfig, clearValidation, enableValidation } from './validation.js';
+import { baseConfig, userDataPromise, cardDataPromise, updateUserDataPromise, updateCardDataPromise, cardDeletionPromise, toggleLikePromise, updateUserAvatarPromise } from './api.js';
 
 const userName = document.querySelector('.profile__title');
 const userAbout = document.querySelector('.profile__description');
@@ -40,7 +40,7 @@ function handleImageClick(evt) {
 
 // Обработка нажатия на редактирование аватара
 userAvatar.addEventListener('click', function() {
-  // updateAvatarForm.reset();
+  updateAvatarForm.reset();
   clearValidation(updateAvatarForm, validationConfig);
   openPopup(popupUpdateAvatar);
 });
@@ -69,7 +69,7 @@ function handleUpdateAvatarFormSubmit(evt) {
     })
     .catch((err) => {
       console.log(err);
-    })
+    });
   closePopup(popupUpdateAvatar);
   updateAvatarForm.reset();
 };
@@ -81,9 +81,12 @@ function handleProfileFormSubmit(evt) {
   evt.preventDefault();
   editProfileForm.querySelector('.popup__button').textContent = 'Сохранение...';
   updateUserDataPromise(profileName.value, profileDescription.value)  // Функция обработки запроса данных при редактировании профиля
-   .then((newUserData) => {
+    .then((newUserData) => {
       userName.textContent = newUserData.name;
       userAbout.textContent = newUserData.about;
+    })
+    .catch((err) => {
+      console.log(err);
     });
   closePopup(popupEditProfile);
   editProfileForm.reset();
@@ -93,10 +96,12 @@ function handleCardFormSubmit(evt) {
   evt.preventDefault();
   addCardForm.querySelector('.popup__button').textContent = 'Сохранение...';
   updateCardDataPromise(placeName.value, photoLink.value) // Функция обработки запроса данных при добавлении новой карточки
-     .then((newCardData) => {
-      // console.log(newCardData);
+    .then((newCardData) => {
       const newCardToAdd = createCard(newCardData, deleteCard, handleLike, handleImageClick, baseConfig.myUserID);
       placesList.prepend(newCardToAdd);
+    })
+    .catch((err) => {
+      console.log(err);
     });
   closePopup(popupNewCard);
   addCardForm.reset();
@@ -111,7 +116,6 @@ let cardToDeleteData = {};
 function deleteCard(cardToDelete, cardToDeleteID) {
   cardToDeleteData = {cardToDelete, id: cardToDeleteID};
   openPopup(popupConfirmDeletion);
-  return; // Удалить?
 };
 
 function handleCardDeletionSubmit(evt) {
@@ -125,7 +129,7 @@ function handleCardDeletionSubmit(evt) {
     })
     .catch((err) => {
       console.log(err);
-    })
+    });
 };
 
 confirmDeletionForm.addEventListener('submit', handleCardDeletionSubmit);
@@ -134,99 +138,20 @@ confirmDeletionForm.addEventListener('submit', handleCardDeletionSubmit);
 enableValidation(validationConfig);
 
 //// API
-const baseConfig = {
-  url: 'https://nomoreparties.co/v1/wff-cohort-42',
-  token: '1bc14402-fe38-4b04-90a8-028dfc53871d',
-  myUserID: '9466035ed48581704398b9ea'
-};
-
-// Функция проверки ответа сервера
-function checkResponse(res) {
-  if (res.ok) {
-    return res.json();
-  }
-  return res.json()
-    .then((error) => {
-      error.httpResponseCode = res.status;
-      return Promise.reject(error);
-    })
-};
-
-// Загрузка информации о пользователе с сервера
-function userDataPromise() {
-  return fetch(`${baseConfig.url}/users/me`, {
-    headers: {
-      authorization: baseConfig.token
-    }
-  })
-    .then(checkResponse)
-};
-
-// Загрузка карточек с сервера
-function cardDataPromise() {
-  return fetch(`${baseConfig.url}/cards`, {
-    headers: {
-      authorization: baseConfig.token
-    }
-  })
-    .then(checkResponse)
-};
-
+// Загрузка информации о пользователе и карточек с сервера
 Promise.all([userDataPromise(), cardDataPromise()])
   .then(([userData, cardsData]) => {
     userName.textContent = userData.name;
     userAbout.textContent = userData.about;
     userAvatar.style['background-image'] = `url('${userData.avatar}')`;
-    // console.log(cardsData);
     cardsData.forEach(function (item) {
       const cardToAdd = createCard(item, deleteCard, handleLike, handleImageClick, baseConfig.myUserID);
       placesList.append(cardToAdd);
-    });
+    })
+  })
+  .catch((err) => {
+    console.log(err);
   });
-
-// Запрос данных при редактировании профиля
-function updateUserDataPromise(newUserName, newUserDescription) {
-  return fetch(`${baseConfig.url}/users/me`, {
-    method: 'PATCH',
-    headers: {
-      authorization: baseConfig.token,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: newUserName,
-      about: newUserDescription
-    })
-  })
-    .then(checkResponse)
-};
-
-// Запрос данных при добавлении новой карточки
-function updateCardDataPromise(newCardName, newCardLink) {
-  return fetch(`${baseConfig.url}/cards`, {
-    method: 'POST',
-    headers: {
-      authorization: baseConfig.token,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: newCardName,
-      link: newCardLink
-      // https://pictures.s3.yandex.net/frontend-developer/cards-compressed/ivanovo.jpg
-    })
-  })
-    .then(checkResponse);
-};
-
-// Запрос на удаление карточки с сервера
-function cardDeletionPromise(cardID) {
-  return fetch(`${baseConfig.url}/cards/${cardID}`, {
-    method: 'DELETE',
-    headers: {
-      authorization: baseConfig.token
-    }
-  })
-    .then(checkResponse);
-};
 
 // Постановка и снятие лайка
 function handleLike(cardID, isLiked, renderLikes) {
@@ -234,30 +159,7 @@ function handleLike(cardID, isLiked, renderLikes) {
     .then((cardElement) => {
       renderLikes(cardElement)
     })
-};
-
-function toggleLikePromise(cardID, isLiked) {
-  return fetch(`${baseConfig.url}/cards/likes/${cardID}`, {
-    method: isLiked ? 'DELETE' : 'PUT', // Если лайк на момент клика есть, значит, будем снимать, иначе - ставить
-    headers: {
-      authorization: baseConfig.token,
-      'Content-Type': 'application/json',
-    }
-  })
-    .then(checkResponse);
-};
-
-// Запрос данных при обновлении аватара пользователя
-function updateUserAvatarPromise(newUserAvatar) {
-  return fetch(`${baseConfig.url}/users/me/avatar`, {
-    method: 'PATCH',
-    headers: {
-      authorization: baseConfig.token,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      avatar: newUserAvatar
-    })
-  })
-    .then(checkResponse)
+    .catch((err) => {
+      console.log(err);
+    });
 };

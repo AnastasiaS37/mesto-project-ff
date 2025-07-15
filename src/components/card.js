@@ -8,10 +8,9 @@ export function createCard(cardElement, deleteCardFunction, likeCardFunction, im
   newCardElement.querySelector('.card__title').textContent = cardElement.name;
   const likeButton = newCardElement.querySelector('.card__like-button');
   const cardLikesNumber = newCardElement.querySelector('.card__likes');
-  // console.log(cardElement.likes);
+
   function renderLikes(cardElement) {
     const cardIsLiked = cardElement.likes.map((like) => like._id).includes(myUserID);
-    // console.log(cardIsLiked);
     likeButton.classList.toggle('card__like-button_is-active', cardIsLiked);
     cardLikesNumber.textContent = cardElement.likes.length;
   };
@@ -38,10 +37,3 @@ export function createCard(cardElement, deleteCardFunction, likeCardFunction, im
 
   return newCardElement;
 };
-
-// Обработчик лайка карточки
-// export function handleLike() {
-//   //evt.target.classList.toggle('card__like-button_is-active');
-//   toggleLikePromise()
-//     .then()
-// };

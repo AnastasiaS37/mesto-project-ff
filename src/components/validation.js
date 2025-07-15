@@ -20,7 +20,7 @@ export function clearValidation(formElement, validationConfig) {
 };
 
 // Добавление классов ошибки
-export function showInputError(formElement, inputElement, errorMessage, validationConfig) {
+function showInputError(formElement, inputElement, errorMessage, validationConfig) {
   // Находим элемент ошибки внутри самой функции
   const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
   inputElement.classList.add(validationConfig.inputErrorClass);
@@ -29,7 +29,7 @@ export function showInputError(formElement, inputElement, errorMessage, validati
 };
 
 // Снятие классов ошибки
-export function hideInputError(formElement, inputElement, validationConfig) {
+function hideInputError(formElement, inputElement, validationConfig) {
   const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
   inputElement.classList.remove(validationConfig.inputErrorClass);
   errorElement.classList.remove(validationConfig.errorClass);
@@ -37,9 +37,8 @@ export function hideInputError(formElement, inputElement, validationConfig) {
 };
 
 // Функция, которая проверяет валидность поля
-export function isValid(formElement, inputElement, validationConfig) {
-	if (inputElement.validity.patternMismatch) {
-	  // данные атрибута доступны у элемента инпута через ключевое слово dataset
+function isValid(formElement, inputElement, validationConfig) {
+  if (inputElement.validity.patternMismatch) {
     inputElement.setCustomValidity(inputElement.dataset.errorMessage);
   } else {
     inputElement.setCustomValidity('');
@@ -52,7 +51,7 @@ export function isValid(formElement, inputElement, validationConfig) {
 };
 
 // Функция, которая проверяет, все ли поля формы валидны
-export function hasInvalidInput(inputList) {
+function hasInvalidInput(inputList) {
   return inputList.some((inputElement) => {
     // Если встретится невалидное поле, колбэк вернёт true, обход массива прекратится и вся функция hasInvalidInput вернёт true
     return !inputElement.validity.valid;
@@ -60,7 +59,7 @@ export function hasInvalidInput(inputList) {
 };
 
 // Функция активации и дезактивации кнопки
-export function toggleButtonState(inputList, buttonElement, validationConfig) {
+function toggleButtonState(inputList, buttonElement, validationConfig) {
   // Если есть хотя бы один невалидный инпут
   if (hasInvalidInput(inputList)) {
     buttonElement.disabled = true;
@@ -72,7 +71,7 @@ export function toggleButtonState(inputList, buttonElement, validationConfig) {
 };
 
 // Добавление слушателя события всем полям формы
-export function setEventListeners(formElement, validationConfig) {
+function setEventListeners(formElement, validationConfig) {
   const inputList = Array.from(formElement.querySelectorAll(validationConfig.inputSelector));
   const buttonElement = formElement.querySelector(validationConfig.submitButtonSelector);
   // Вызываем toggleButtonState в начале, чтобы кнопка была заблокирована сразу, до ввода данных в поля

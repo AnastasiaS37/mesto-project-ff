@@ -15,7 +15,9 @@ const popupImage = document.querySelector('.popup_type_image');
 const editProfileForm = document.forms['edit-profile'];
 const profileName = editProfileForm.elements.name;
 const profileDescription = editProfileForm.elements.description;
+const saveButtonEditProfileForm = editProfileForm.querySelector('.popup__button');
 const addCardForm = document.forms['new-place'];
+const saveButtonAddCardForm = addCardForm.querySelector('.popup__button');
 const placeName = addCardForm.elements['place-name'];
 const photoLink = addCardForm.elements.link;
 const placesList = document.querySelector('.places__list');
@@ -24,6 +26,7 @@ const confirmDeletionForm = document.forms['confirm-deletion'];
 const popupUpdateAvatar = document.querySelector('.popup_type_update-avatar');
 const updateAvatarForm = document.forms['update-avatar'];
 const avatarUrl = updateAvatarForm.elements['avatar-url'];
+const saveButtonUpdateAvatarForm = updateAvatarForm.querySelector('.popup__button');
 
 addCloseListeners(popupImage);
 addCloseListeners(popupEditProfile);
@@ -62,13 +65,17 @@ cardAddButton.addEventListener('click', function() {
 // Обработка отправки формы обновления аватара 
 function handleUpdateAvatarFormSubmit(evt) {
   evt.preventDefault();
-  updateAvatarForm.querySelector('.popup__button').textContent = 'Сохранение...';
+  const defaultText = saveButtonUpdateAvatarForm.textContent;
+  saveButtonUpdateAvatarForm.textContent = 'Сохранение...';
   updateUserAvatarPromise(avatarUrl.value)
     .then((userData) => {
       userAvatar.style['background-image'] = `url('${userData.avatar}')`;
     })
     .catch((err) => {
       console.log(err);
+    })
+    .finally(() => {
+      saveButtonUpdateAvatarForm.textContent = defaultText;
     });
   closePopup(popupUpdateAvatar);
   updateAvatarForm.reset();
@@ -79,14 +86,18 @@ updateAvatarForm.addEventListener('submit', handleUpdateAvatarFormSubmit);
 // Обработка отправки формы профиля и формы добавления карточки
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
-  editProfileForm.querySelector('.popup__button').textContent = 'Сохранение...';
-  updateUserDataPromise(profileName.value, profileDescription.value)  // Функция обработки запроса данных при редактировании профиля
+  const defaultText = saveButtonEditProfileForm.textContent;
+  saveButtonEditProfileForm.textContent = 'Сохранение...';
+  updateUserDataPromise(profileName.value, profileDescription.value)
     .then((newUserData) => {
       userName.textContent = newUserData.name;
       userAbout.textContent = newUserData.about;
     })
     .catch((err) => {
       console.log(err);
+    })
+    .finally(() => {
+      saveButtonEditProfileForm.textContent = defaultText;
     });
   closePopup(popupEditProfile);
   editProfileForm.reset();
@@ -94,7 +105,8 @@ function handleProfileFormSubmit(evt) {
 
 function handleCardFormSubmit(evt) {
   evt.preventDefault();
-  addCardForm.querySelector('.popup__button').textContent = 'Сохранение...';
+  const defaultText = saveButtonAddCardForm.textContent;
+  saveButtonAddCardForm.textContent = 'Сохранение...';
   updateCardDataPromise(placeName.value, photoLink.value) // Функция обработки запроса данных при добавлении новой карточки
     .then((newCardData) => {
       const newCardToAdd = createCard(newCardData, deleteCard, handleLike, handleImageClick, baseConfig.myUserID);
@@ -102,6 +114,9 @@ function handleCardFormSubmit(evt) {
     })
     .catch((err) => {
       console.log(err);
+    })
+    .finally(() => {
+      saveButtonAddCardForm.textContent = defaultText;
     });
   closePopup(popupNewCard);
   addCardForm.reset();

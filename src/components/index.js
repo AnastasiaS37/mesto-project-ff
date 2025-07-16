@@ -12,6 +12,8 @@ const popupEditProfile = document.querySelector('.popup_type_edit');
 const cardAddButton = document.querySelector('.profile__add-button');
 const popupNewCard = document.querySelector('.popup_type_new-card');
 const popupImage = document.querySelector('.popup_type_image');
+const popupImagePicture = popupImage.querySelector('.popup__image');
+const popupImageCaption = popupImage.querySelector('.popup__caption');
 const editProfileForm = document.forms['edit-profile'];
 const profileName = editProfileForm.elements.name;
 const profileDescription = editProfileForm.elements.description;
@@ -35,10 +37,11 @@ addCloseListeners(popupConfirmDeletion);
 addCloseListeners(popupUpdateAvatar);
 
 // Обработчик нажатия на картинку
-function handleImageClick(evt) {
+function handleImageClick(link, name) {
   openPopup(popupImage);
-  popupImage.querySelector('.popup__image').src = evt.target.src;
-  popupImage.querySelector('.popup__caption').textContent = evt.target.alt;
+  popupImagePicture.src = link;
+  popupImagePicture.alt = name;
+  popupImageCaption.textContent = name;
 };
 
 // Обработка нажатия на редактирование аватара
@@ -70,6 +73,8 @@ function handleUpdateAvatarFormSubmit(evt) {
   updateUserAvatarPromise(avatarUrl.value)
     .then((userData) => {
       userAvatar.style['background-image'] = `url('${userData.avatar}')`;
+      closePopup(popupUpdateAvatar);
+      updateAvatarForm.reset();
     })
     .catch((err) => {
       console.log(err);
@@ -77,8 +82,6 @@ function handleUpdateAvatarFormSubmit(evt) {
     .finally(() => {
       saveButtonUpdateAvatarForm.textContent = defaultText;
     });
-  closePopup(popupUpdateAvatar);
-  updateAvatarForm.reset();
 };
 
 updateAvatarForm.addEventListener('submit', handleUpdateAvatarFormSubmit);
@@ -92,6 +95,8 @@ function handleProfileFormSubmit(evt) {
     .then((newUserData) => {
       userName.textContent = newUserData.name;
       userAbout.textContent = newUserData.about;
+      closePopup(popupEditProfile);
+      editProfileForm.reset();
     })
     .catch((err) => {
       console.log(err);
@@ -99,8 +104,6 @@ function handleProfileFormSubmit(evt) {
     .finally(() => {
       saveButtonEditProfileForm.textContent = defaultText;
     });
-  closePopup(popupEditProfile);
-  editProfileForm.reset();
 };
 
 function handleCardFormSubmit(evt) {
@@ -111,6 +114,8 @@ function handleCardFormSubmit(evt) {
     .then((newCardData) => {
       const newCardToAdd = createCard(newCardData, deleteCard, handleLike, handleImageClick, baseConfig.myUserID);
       placesList.prepend(newCardToAdd);
+      closePopup(popupNewCard);
+      addCardForm.reset();
     })
     .catch((err) => {
       console.log(err);
@@ -118,8 +123,6 @@ function handleCardFormSubmit(evt) {
     .finally(() => {
       saveButtonAddCardForm.textContent = defaultText;
     });
-  closePopup(popupNewCard);
-  addCardForm.reset();
 };
 
 editProfileForm.addEventListener('submit', handleProfileFormSubmit);
@@ -169,10 +172,10 @@ Promise.all([userDataPromise(), cardDataPromise()])
   });
 
 // Постановка и снятие лайка
-function handleLike(cardID, isLiked, renderLikes) {
+function handleLike(cardID, likeButton, cardLikesNumber, isLiked, renderLikes) {
   toggleLikePromise(cardID, isLiked)
-    .then((cardElement) => {
-      renderLikes(cardElement)
+    .then((cardObj) => {
+      renderLikes(cardObj, likeButton, cardLikesNumber, baseConfig.myUserID)
     })
     .catch((err) => {
       console.log(err);

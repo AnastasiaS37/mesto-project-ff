@@ -1,7 +1,10 @@
 export const baseConfig = {
   url: 'https://nomoreparties.co/v1/wff-cohort-42',
-  token: '1bc14402-fe38-4b04-90a8-028dfc53871d',
-  myUserID: '9466035ed48581704398b9ea'
+  myUserID: '9466035ed48581704398b9ea',
+  headers: {
+    authorization: '1bc14402-fe38-4b04-90a8-028dfc53871d',
+    'Content-Type': 'application/json'
+  }
 };
 
 // Функция проверки ответа сервера
@@ -19,18 +22,14 @@ function checkResponse(res) {
 // Запрос информации о пользователе и карточек с сервера
 export function userDataPromise() {
   return fetch(`${baseConfig.url}/users/me`, {
-    headers: {
-      authorization: baseConfig.token
-    }
+    headers: baseConfig.headers
   })
     .then(checkResponse)
 };
 
 export function cardDataPromise() {
   return fetch(`${baseConfig.url}/cards`, {
-    headers: {
-      authorization: baseConfig.token
-    }
+    headers: baseConfig.headers
   })
     .then(checkResponse)
 };
@@ -39,10 +38,7 @@ export function cardDataPromise() {
 export function updateUserDataPromise(newUserName, newUserDescription) {
   return fetch(`${baseConfig.url}/users/me`, {
     method: 'PATCH',
-    headers: {
-      authorization: baseConfig.token,
-      'Content-Type': 'application/json'
-    },
+    headers: baseConfig.headers,
     body: JSON.stringify({
       name: newUserName,
       about: newUserDescription
@@ -55,10 +51,7 @@ export function updateUserDataPromise(newUserName, newUserDescription) {
 export function updateCardDataPromise(newCardName, newCardLink) {
   return fetch(`${baseConfig.url}/cards`, {
     method: 'POST',
-    headers: {
-      authorization: baseConfig.token,
-      'Content-Type': 'application/json'
-    },
+    headers: baseConfig.headers,
     body: JSON.stringify({
       name: newCardName,
       link: newCardLink
@@ -71,9 +64,7 @@ export function updateCardDataPromise(newCardName, newCardLink) {
 export function cardDeletionPromise(cardID) {
   return fetch(`${baseConfig.url}/cards/${cardID}`, {
     method: 'DELETE',
-    headers: {
-      authorization: baseConfig.token
-    }
+    headers: baseConfig.headers
   })
     .then(checkResponse);
 };
@@ -82,10 +73,7 @@ export function cardDeletionPromise(cardID) {
 export function toggleLikePromise(cardID, isLiked) {
   return fetch(`${baseConfig.url}/cards/likes/${cardID}`, {
     method: isLiked ? 'DELETE' : 'PUT', // Если лайк на момент клика есть, значит, будем снимать, иначе - ставить
-    headers: {
-      authorization: baseConfig.token,
-      'Content-Type': 'application/json',
-    }
+    headers: baseConfig.headers
   })
     .then(checkResponse);
 };
@@ -94,10 +82,7 @@ export function toggleLikePromise(cardID, isLiked) {
 export function updateUserAvatarPromise(newUserAvatar) {
   return fetch(`${baseConfig.url}/users/me/avatar`, {
     method: 'PATCH',
-    headers: {
-      authorization: baseConfig.token,
-      'Content-Type': 'application/json'
-    },
+    headers: baseConfig.headers,
     body: JSON.stringify({
       avatar: newUserAvatar
     })

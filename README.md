@@ -24,7 +24,7 @@ The project demonstrates working with the DOM, forms, and external APIs.
 * Added form validation
 * Implemented user avatar upload via URL
 
-You can view the project demo here: <a href="https://anastasias37.github.io/mesto-project-ff/" target="_blank" rel="noopener noreferrer">Mesto Demo</a>
+You can view the project demo here: [Mesto Demo](https://anastasias37.github.io/mesto-project-ff/)
 
 ## 🏷️ Topics
 

@@ -6,11 +6,11 @@ The project demonstrates working with the DOM, forms, and external APIs.
 
 ## 📌 Key Features
 
-* User avatar upload
 * Profile information editing
-* Adding and deleting photo cards
-* Like functionality for cards
-* Dynamic UI updates without page reload
+* User avatar upload
+* Uploading and managing personal photos
+* Viewing and liking other users’ photo cards
+* UI updates without page reload
 
 ## 🛠️ Tech Stack
 
@@ -19,13 +19,16 @@ The project demonstrates working with the DOM, forms, and external APIs.
 
 ## 👩‍💻 My Contributions
 
-* Integrated modal windows
-* Implemented order form validation
-* Organized project using MVP architecture (full project architecture description can be found [here](./Architecture_description.md)).
+* Integrated asynchronous API requests
+* Implemented DOM manipulation and event handling
+* Added form validation
+* Implemented user avatar upload via URL
+
+You can view the project demo here: [Mesto Demo](https://anastasias37.github.io/mesto-project-ff/)
 
 ## 🏷️ Topics
 
-typescript mvp forms modal-window shopping-cart
+javascript api forms validation profile photos likes
 
 ## 🚀 Setup & Installation
 
@@ -35,9 +38,14 @@ typescript mvp forms modal-window shopping-cart
 npm install
 ```
 
-### Project Running
+### Development Server
 
 ```bash
-npm run start
+npm run dev
 ```
 
+### Production Build
+
+```bash
+npm run build
+```
